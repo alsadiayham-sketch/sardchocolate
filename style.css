@@ -1527,6 +1527,7 @@ html[dir="rtl"] .pdp-image { border-radius: 0 20px 20px 0; }
     flex-wrap: wrap;
     gap: 12px;
     margin-top: 16px;
+    justify-content: center;
 }
 .builder-delivery-option {
     flex: 1;

@@ -43,8 +43,8 @@
         .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f3f4f6; font-size: 0.95rem; }
         .summary-row.total { border-bottom: none; padding-top: 15px; font-size: 1.3rem; font-weight: 900; color: var(--primary-dark); }
         .summary-row .label { color: var(--text-light); }
-        .delivery-options { display: flex; flex-direction: column; gap: 10px; margin: 15px 0; }
-        .delivery-option { display: flex; align-items: center; gap: 12px; padding: 15px; border: 2px solid var(--primary-light); border-radius: 12px; cursor: pointer; transition: var(--transition); }
+        .delivery-options { display: flex; flex-direction: column; gap: 10px; margin: 15px 0; align-items: center; }
+        .delivery-option { display: flex; align-items: center; gap: 12px; padding: 15px; border: 2px solid var(--primary-light); border-radius: 12px; cursor: pointer; transition: var(--transition); width: 100%; max-width: 400px; }
         .delivery-option:hover { border-color: var(--primary); background: var(--primary-lighter); }
         .delivery-option.selected { border-color: var(--primary); background: var(--primary-lighter); }
         .delivery-option .radio-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--primary-light); display: flex; align-items: center; justify-content: center; transition: var(--transition); }
