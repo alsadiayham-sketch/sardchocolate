@@ -520,7 +520,7 @@ function resetPackagingBuilderForm() {
     packagingBuilderSets = [createDefaultPackagingSet()];
     var title = document.getElementById('packagingBuilderTitle');
     var submit = document.getElementById('packagingBuilderSubmit');
-    if (title) title.textContent = 'صممي علبتك المخصصة';
+    if (title) title.textContent = 'صمم علبتك المخصصة';
     if (submit) submit.textContent = 'أضيفي إلى السلة';
     if (document.getElementById('packageWrapperColor')) document.getElementById('packageWrapperColor').value = 'gold';
     if (document.getElementById('packageNotes')) document.getElementById('packageNotes').value = '';

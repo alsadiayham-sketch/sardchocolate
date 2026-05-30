@@ -5,7 +5,7 @@ var DEFAULT_DISCOUNTS = [];
 var DEFAULT_SITE_SETTINGS = {
     whatsappNumber: '970595455369',
     heroSubtitle: 'شوكولاتة فاخرة بتغليف مخصص حسب ذوقك',
-    aboutText: 'سرد شوكولاتة - مصنع شوكولاتة فلسطيني متخصص بصناعة أجود أنواع الشوكولاتة يدوياً.\nنقدم تغليف مخصص وتشكيلات فريدة لكل المناسبات.\nاختاري الألوان والحشوات والأنواع اللي بتحبيها وخلينا نجهزلك أحلى علبة.',
+    aboutText: 'سرد شوكولاتة - مصنع شوكولاتة فلسطيني متخصص بصناعة أجود أنواع الشوكولاتة يدوياً.\nنقدم تغليف مخصص وتشكيلات فريدة لكل المناسبات.\nاختار الألوان والحشوات والأنواع اللي بتحبها وخلينا نجهزلك أحلى علبة.',
     instagramLink: 'https://www.instagram.com/sardchocolate.ps/',
     tiktokLink: ''
 };
@@ -13,8 +13,8 @@ var DEFAULT_SITE_SETTINGS = {
 var BRANDS_DATA = [{ name: 'شوكولاتة داكنة', logo: 'https://images.unsplash.com/photo-1481391319762-47dff72954d9?w=100&h=100&fit=crop' }, { name: 'شوكولاتة بالحليب', logo: 'https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=100&h=100&fit=crop' }, { name: 'شوكولاتة بيضاء', logo: 'https://images.unsplash.com/photo-1587132137056-bfbf0166836e?w=100&h=100&fit=crop' }, { name: 'تغليف مخصص', logo: 'https://images.unsplash.com/photo-1511381939415-e44015466834?w=100&h=100&fit=crop' }];
 
 function normalizeSizeEntry(entry) {
-    if (!entry) return { size: '-', unit: 'cm', price: 0 };
-    var unit = entry.unit || 'cm';
+    if (!entry) return { size: '1', unit: 'kg', price: 0 };
+    var unit = entry.unit || 'kg';
     return {
         size: String(entry.size || '-').trim() || '-',
         unit: unit,
@@ -96,6 +96,7 @@ function getSizeData(product, sizeIdx) {
 }
 
 function getUnitLabel(unit) {
+    if (unit === 'kg') return 'كغم';
     if (unit === 'g') return 'غرام';
     if (unit === 'cm') return 'سم';
     if (unit === 'ml') return 'مل';

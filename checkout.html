@@ -208,7 +208,7 @@
             html += '</div>';
             if (selectedDelivery === 'delivery') {
                 html += '<div class="delivery-regions" style="margin-top:15px;">';
-                html += '<h4 style="margin-bottom:10px; font-size:0.95rem;">اختاري المنطقة:</h4>';
+                html += '<h4 style="margin-bottom:10px; font-size:0.95rem;">اختار المنطقة:</h4>';
                 html += '<div class="region-options">';
                 html += '<div class="region-option ' + (selectedRegion === 'westbank' ? 'selected' : '') + '" onclick="selectRegion(\'westbank\')"><span>الضفة</span><span class="region-cost">₪20</span></div>';
                 html += '<div class="region-option ' + (selectedRegion === 'jerusalem' ? 'selected' : '') + '" onclick="selectRegion(\'jerusalem\')"><span>القدس</span><span class="region-cost">₪30</span></div>';
@@ -308,7 +308,7 @@
 
         function getDeliveryCostLabel() {
             if (selectedDelivery === 'pickup') return 'مجاني (استلام ذاتي)';
-            if (!selectedRegion) return 'اختاري المنطقة';
+            if (!selectedRegion) return 'اختار المنطقة';
             return formatCurrency(getDeliveryCost()) + ' (' + DELIVERY_LABELS[selectedRegion] + ')';
         }
 
