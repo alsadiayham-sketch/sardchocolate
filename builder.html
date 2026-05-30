@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sard Chocolate | صمم علبتك</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="logo.png">
+    <style>
+        .builder-page {
+            min-height: 100vh;
+            padding: 100px 20px 60px;
+            background: var(--bg);
+        }
+        .builder-page-container {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+        .builder-page .packaging-builder-dialog {
+            width: 100%;
+            max-height: none;
+            border-radius: 28px;
+            overflow: visible;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 22px 50px rgba(0, 0, 0, 0.08);
+        }
+        .builder-page .packaging-builder-body {
+            overflow-y: visible;
+        }
+        .builder-page .packaging-builder-header {
+            border-radius: 28px 28px 0 0;
+        }
+        .builder-page .packaging-builder-footer {
+            border-radius: 0 0 28px 28px;
+        }
+        .builder-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+            color: var(--primary-dark);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        .builder-back-link:hover {
+            color: var(--primary);
+        }
+        @media (max-width: 768px) {
+            .builder-page {
+                padding: 80px 10px 40px;
+            }
+            .builder-page .packaging-builder-dialog {
+                border-radius: 18px;
+            }
+            .builder-page .packaging-builder-header {
+                border-radius: 18px 18px 0 0;
+            }
+            .builder-page .packaging-builder-footer {
+                border-radius: 0 0 18px 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <img src="logo.png" alt="Sard Chocolate" class="logo-img">
+                <span class="logo-text">Sard Chocolate</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#products">المنتجات</a></li>
+                <li><a href="index.html#about">من نحن</a></li>
+                <li><a href="index.html#delivery">التوصيل</a></li>
+                <li><a href="index.html#contact">تواصل معنا</a></li>
+            </ul>
+            <div class="cart-icon" id="cartIcon" onclick="window.location.href='checkout.html'">
+                🛒
+                <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
+            </div>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        </div>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="index.html#products" onclick="toggleMobileMenu()">المنتجات</a>
+        <a href="index.html#about" onclick="toggleMobileMenu()">من نحن</a>
+        <a href="index.html#delivery" onclick="toggleMobileMenu()">التوصيل</a>
+        <a href="index.html#contact" onclick="toggleMobileMenu()">تواصل معنا</a>
+    </div>
+
+    <div class="builder-page">
+        <div class="builder-page-container">
+            <a href="index.html" class="builder-back-link">→ العودة للمتجر</a>
+
+            <div class="packaging-builder-dialog">
+                <div class="packaging-builder-header">
+                    <div>
+                        <h3 id="packagingBuilderTitle">صمم علبتك المخصصة</h3>
+                        <p>اختار التشكيلات وبيانات الاستلام، وسيتم تأكيد السعر عبر واتساب.</p>
+                    </div>
+                </div>
+                <form id="packagingBuilderForm" class="packaging-builder-form">
+                    <div class="packaging-builder-body">
+                        <div class="builder-section-block">
+                            <div class="builder-section-head">
+                                <h4>التشكيلات داخل العلبة</h4>
+                                <button type="button" class="builder-add-set" onclick="addPackagingSet()">+ أضف تشكيلة أخرى</button>
+                            </div>
+                            <div id="packagingSetsContainer" class="packaging-sets-container"></div>
+                        </div>
+
+                        <div class="builder-grid">
+                            <div class="builder-field">
+                                <label for="packageWrapperColor">لون التغليف</label>
+                                <select id="packageWrapperColor">
+                                    <option value="gold">ذهبي</option>
+                                    <option value="silver">فضي</option>
+                                    <option value="red">أحمر</option>
+                                    <option value="pink">زهري</option>
+                                    <option value="purple">بنفسجي</option>
+                                    <option value="black">أسود</option>
+                                    <option value="white">أبيض</option>
+                                    <option value="blue">أزرق</option>
+                                </select>
+                            </div>
+                            <div class="builder-field builder-note-box">
+                                <label for="packageNotes">ملاحظات</label>
+                                <textarea id="packageNotes" rows="3" placeholder="أي تفاصيل إضافية عن التغليف أو الترتيب..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="builder-section-block">
+                            <h4>طريقة الاستلام</h4>
+                            <div class="builder-delivery-options">
+                                <label class="builder-delivery-option">
+                                    <input type="radio" name="packageDelivery" value="pickup" onchange="togglePackagingDeliveryFields()">
+                                    <span>استلام من المصنع</span>
+                                </label>
+                                <label class="builder-delivery-option">
+                                    <input type="radio" name="packageDelivery" value="delivery" onchange="togglePackagingDeliveryFields()" checked>
+                                    <span>توصيل</span>
+                                </label>
+                            </div>
+                            <div class="builder-customer-grid">
+                                <div class="builder-field">
+                                    <label for="packageCustomerName">الاسم</label>
+                                    <input type="text" id="packageCustomerName" placeholder="اسم المستلم">
+                                </div>
+                                <div class="builder-field">
+                                    <label for="packageCustomerPhone">رقم الهاتف</label>
+                                    <input type="tel" id="packageCustomerPhone" placeholder="05xxxxxxxx" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                </div>
+                                <div class="builder-field" id="packageLocationField">
+                                    <label for="packageCustomerLocation">الموقع</label>
+                                    <textarea id="packageCustomerLocation" rows="2" placeholder="المدينة، الحي، الشارع أو أي وصف للموقع"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="packaging-builder-footer">
+                        <p class="builder-price-note">السعر لا يظهر هنا وسيتم تأكيده من الإدارة عبر واتساب.</p>
+                        <button type="submit" class="btn-primary" id="packagingBuilderSubmit">أضف إلى السلة</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2026 سرد شوكولاتة. جميع الحقوق محفوظة</p>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

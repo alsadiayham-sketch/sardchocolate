@@ -30,7 +30,7 @@
             </div>
             <ul class="nav-links">
                 <li><a href="#products">المنتجات</a></li>
-                <li><a href="#packaging-builder">علبتك المخصصة</a></li>
+                <li><a href="builder.html">علبتك المخصصة</a></li>
                 <li><a href="#about">من نحن</a></li>
                 <li><a href="#delivery">التوصيل</a></li>
                 <li><a href="#contact">تواصل معنا</a></li>
@@ -46,7 +46,7 @@
 
     <div class="mobile-menu" id="mobileMenu">
         <a href="#products" onclick="toggleMobileMenu()">المنتجات</a>
-        <a href="#packaging-builder" onclick="toggleMobileMenu()">علبتك المخصصة</a>
+        <a href="builder.html" onclick="toggleMobileMenu()">علبتك المخصصة</a>
         <a href="#about" onclick="toggleMobileMenu()">من نحن</a>
         <a href="#delivery" onclick="toggleMobileMenu()">التوصيل</a>
         <a href="#contact" onclick="toggleMobileMenu()">تواصل معنا</a>
@@ -63,7 +63,7 @@
             <p class="hero-subtitle" id="heroSubtitle">شوكولاتة فلسطينية يدوية الصنع بأجود المكونات</p>
             <p class="hero-tagline">تغليف مخصص لكل المناسبات مع توصيل إلى الضفة والقدس والداخل</p>
             <a href="#products" class="btn-primary">تسوق الآن</a>
-            <a href="javascript:void(0)" onclick="openPackagingBuilder()" class="btn-primary" style="margin-top:10px;background:var(--primary-dark);">🎁 صمم علبتك المخصصة</a>
+            <a href="builder.html" class="btn-primary" style="margin-top:10px;background:var(--primary-dark);">🎁 صمم علبتك المخصصة</a>
         </div>
     </section>
 
@@ -104,27 +104,6 @@
         </div>
     </section>
 
-
-    <section id="packaging-builder" class="packaging-builder-section">
-        <div class="container">
-            <div class="packaging-builder-card">
-                <div class="packaging-builder-copy">
-                    <span class="packaging-builder-badge">🎁 علب مخصصة</span>
-                    <h2 class="section-title">صمم علبتك بالطريقة التي تحبها</h2>
-                    <p>اختار أكثر من تشكيلة داخل نفس العلبة، حدد لون التغليف، وأضف ملاحظاتك وسيتم تأكيد السعر النهائي معك عبر واتساب.</p>
-                    <ul class="packaging-builder-points">
-                        <li>أكثر من تشكيلة في نفس العلبة</li>
-                        <li>اختيار الحشوات ولون التغليف</li>
-                        <li>إمكانية الاستلام من المصنع أو التوصيل</li>
-                    </ul>
-                </div>
-                <div class="packaging-builder-action">
-                    <button type="button" class="btn-primary packaging-builder-btn" onclick="openPackagingBuilder()">ابدأ تصميم العلبة</button>
-                    <p>السعر يحدده الفريق بعد مراجعة الطلب.</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <section id="about" class="about-section">
         <div class="container">
@@ -187,81 +166,6 @@
             </div>
         </div>
     </section>
-
-    <div class="modal-overlay packaging-builder-modal" id="packagingBuilderModal" style="display:none;" onclick="closePackagingBuilder(event)">
-        <div class="packaging-builder-dialog" onclick="event.stopPropagation()">
-            <div class="packaging-builder-header">
-                <div>
-                    <h3 id="packagingBuilderTitle">صمم علبتك المخصصة</h3>
-                        <p>اختار التشكيلات وبيانات الاستلام، وسيتم تأكيد السعر عبر واتساب.</p>
-                </div>
-                <button type="button" class="packaging-builder-close" onclick="closePackagingBuilder()">✕</button>
-            </div>
-            <form id="packagingBuilderForm" class="packaging-builder-form">
-                <div class="packaging-builder-body">
-                    <div class="builder-section-block">
-                        <div class="builder-section-head">
-                            <h4>التشكيلات داخل العلبة</h4>
-                            <button type="button" class="builder-add-set" onclick="addPackagingSet()">+ أضيفي تشكيلة أخرى</button>
-                        </div>
-                        <div id="packagingSetsContainer" class="packaging-sets-container"></div>
-                    </div>
-
-                    <div class="builder-grid">
-                        <div class="builder-field">
-                            <label for="packageWrapperColor">لون التغليف</label>
-                            <select id="packageWrapperColor">
-                                <option value="gold">ذهبي</option>
-                                <option value="silver">فضي</option>
-                                <option value="red">أحمر</option>
-                                <option value="pink">زهري</option>
-                                <option value="purple">بنفسجي</option>
-                                <option value="black">أسود</option>
-                                <option value="white">أبيض</option>
-                                <option value="blue">أزرق</option>
-                            </select>
-                        </div>
-                        <div class="builder-field builder-note-box">
-                            <label for="packageNotes">ملاحظات</label>
-                            <textarea id="packageNotes" rows="3" placeholder="أي تفاصيل إضافية عن التغليف أو الترتيب..."></textarea>
-                        </div>
-                    </div>
-
-                    <div class="builder-section-block">
-                        <h4>طريقة الاستلام</h4>
-                        <div class="builder-delivery-options">
-                            <label class="builder-delivery-option">
-                                <input type="radio" name="packageDelivery" value="pickup" onchange="togglePackagingDeliveryFields()">
-                                <span>استلام من المصنع</span>
-                            </label>
-                            <label class="builder-delivery-option">
-                                <input type="radio" name="packageDelivery" value="delivery" onchange="togglePackagingDeliveryFields()" checked>
-                                <span>توصيل</span>
-                            </label>
-                        </div>
-                        <div class="builder-customer-grid">
-                            <div class="builder-field">
-                                <label for="packageCustomerName">الاسم</label>
-                                <input type="text" id="packageCustomerName" placeholder="اسم المستلم">
-                            </div>
-                            <div class="builder-field">
-                                <label for="packageCustomerPhone">رقم الهاتف</label>
-                                <input type="tel" id="packageCustomerPhone" placeholder="05xxxxxxxx" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-                            </div>
-                            <div class="builder-field" id="packageLocationField">
-                                <label for="packageCustomerLocation">الموقع</label>
-                                <textarea id="packageCustomerLocation" rows="2" placeholder="المدينة، الحي، الشارع أو أي وصف للموقع"></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="packaging-builder-footer">
-                    <p class="builder-price-note">السعر لا يظهر هنا وسيتم تأكيده من الإدارة عبر واتساب.</p>
-                    <button type="submit" class="btn-primary" id="packagingBuilderSubmit">أضيفي إلى السلة</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <div class="modal-overlay pdp-overlay" id="pdpModal" style="display:none;" onclick="closePDP(event)">
         <div class="pdp-modal" onclick="event.stopPropagation()">

@@ -1287,71 +1287,6 @@ html[dir="rtl"] .pdp-image { border-radius: 0 20px 20px 0; }
 
 
 /* Packaging Builder + Order Tracking */
-.packaging-builder-section {
-    padding: 70px 0 30px;
-    background: linear-gradient(135deg, var(--bg-alt), #fff);
-}
-.packaging-builder-card {
-    background: white;
-    border-radius: calc(var(--radius) + 6px);
-    box-shadow: var(--shadow);
-    padding: 34px;
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
-    gap: 24px;
-    align-items: center;
-}
-.packaging-builder-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 999px;
-    background: var(--primary-lighter);
-    color: var(--primary-dark);
-    font-weight: 700;
-    margin-bottom: 14px;
-}
-.packaging-builder-copy p {
-    color: var(--text-light);
-    margin-bottom: 18px;
-    line-height: 1.9;
-}
-.packaging-builder-points {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    display: grid;
-    gap: 10px;
-}
-.packaging-builder-points li {
-    background: var(--bg-alt);
-    border-radius: 14px;
-    padding: 12px 16px;
-    font-weight: 600;
-}
-.packaging-builder-action {
-    background: var(--primary-lighter);
-    border-radius: 20px;
-    padding: 24px;
-    text-align: center;
-}
-.packaging-builder-btn {
-    width: 100%;
-    margin-bottom: 12px;
-}
-.packaging-builder-action p {
-    margin: 0;
-    color: var(--primary-dark);
-    font-weight: 600;
-}
-.packaging-builder-modal {
-    padding: 18px;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.65);
-    z-index: 1200;
-}
 .packaging-builder-dialog {
     width: min(960px, 100%);
     max-height: calc(100vh - 36px);
@@ -1720,22 +1655,14 @@ html[dir="rtl"] .pdp-image { border-radius: 0 20px 20px 0; }
     color: var(--primary-dark);
 }
 @media (max-width: 768px) {
-    .packaging-builder-card,
     .builder-set-grid,
     .builder-grid,
     .builder-customer-grid,
     .order-tracking-form {
         grid-template-columns: 1fr;
     }
-    .packaging-builder-section {
-        padding-top: 50px;
-    }
-    .packaging-builder-card,
     .order-tracking-card {
         padding: 22px;
-    }
-    .packaging-builder-modal {
-        padding: 0;
     }
     .packaging-builder-dialog {
         width: 100vw;

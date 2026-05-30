@@ -26,6 +26,14 @@ document.addEventListener('DOMContentLoaded', function () {
     setupSearch('navSearchInput', 'navSearchDropdown');
     setupSearch('productsSearchInput', 'productsSearchDropdown');
     initializePackagingBuilder();
+    if (window.location.pathname.indexOf('builder.html') >= 0) {
+        var params = new URLSearchParams(window.location.search);
+        var editId = params.get('edit');
+        if (editId) {
+            var item = cart.find(function (entry) { return entry.type === 'custom_package' && entry.id === editId; });
+            if (item) populatePackagingBuilder(item);
+        }
+    }
     initializeOrderTracking();
     updateCartBadge();
     updateCheckoutLink(cart.length ? updateCartTotal() : 0);
@@ -553,8 +561,11 @@ function populatePackagingBuilder(item) {
 }
 
 function openPackagingBuilder(itemId) {
-    var modal = document.getElementById('packagingBuilderModal');
-    if (!modal) return;
+    var onBuilderPage = window.location.pathname.indexOf('builder.html') >= 0;
+    if (!onBuilderPage) {
+        window.location.href = itemId ? 'builder.html?edit=' + encodeURIComponent(itemId) : 'builder.html';
+        return;
+    }
     if (itemId) {
         var item = cart.find(function (entry) { return entry.type === 'custom_package' && entry.id === itemId; });
         if (!item) return;
@@ -562,11 +573,13 @@ function openPackagingBuilder(itemId) {
     } else {
         resetPackagingBuilderForm();
     }
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
 }
 
 function closePackagingBuilder(event) {
+    if (window.location.pathname.indexOf('builder.html') >= 0) {
+        window.location.href = 'index.html';
+        return;
+    }
     if (event && event.target !== event.currentTarget) return;
     var modal = document.getElementById('packagingBuilderModal');
     if (!modal) return;
@@ -608,15 +621,17 @@ function saveCustomPackageFromBuilder() {
     updateCartBadge();
     updateCheckoutLink(updateCartTotal());
     renderCart();
+    if (window.location.pathname.indexOf('builder.html') >= 0) {
+        alert(existingIndex >= 0 ? 'تم تحديث العلبة المخصصة بنجاح' : 'تمت إضافة العلبة المخصصة إلى السلة');
+        window.location.href = 'index.html';
+        return;
+    }
     closePackagingBuilder();
     alert(existingIndex >= 0 ? 'تم تحديث العلبة المخصصة بنجاح' : 'تمت إضافة العلبة المخصصة إلى السلة');
 }
 
 function editCustomPackage(itemId) {
-    if (document.getElementById('cartSidebar').classList.contains('active')) toggleCart();
-    setTimeout(function () {
-        openPackagingBuilder(itemId);
-    }, 180);
+    window.location.href = 'builder.html?edit=' + encodeURIComponent(itemId);
 }
 
 function getCustomPackageSetsHtml(sets) {
