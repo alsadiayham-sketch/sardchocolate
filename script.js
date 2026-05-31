@@ -219,18 +219,17 @@ function checkDiscountBanner() {
         return true;
     });
 
+    var text = '';
     if (activeDiscounts.length) {
-        document.body.classList.add('has-banner');
-        banner.style.display = 'block';
-        var text = activeDiscounts.map(function (discount) {
+        text = activeDiscounts.map(function (discount) {
             return discount.description;
         }).join('     |     ');
-        textNode.textContent = text + '     |     ' + text;
     } else {
-        document.body.classList.remove('has-banner');
-        banner.style.display = 'none';
-        textNode.textContent = '';
+        text = '🍫 أجود أنواع الشوكولاتة الفاخرة     |     توصيل لجميع المناطق     |     صمم علبتك المخصصة الآن';
     }
+    document.body.classList.add('has-banner');
+    banner.style.display = 'block';
+    textNode.textContent = text + '     |     ' + text;
 }
 
 function getFilteredProducts(filter) {
