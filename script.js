@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setDeliveryMethod(deliveryMethod);
     setLoadingState(true);
     subscribeToStoreData();
+    trackVisit();
     // Fallback if Firestore takes too long
     setTimeout(function () {
         if (!storeLoadState.products || !storeLoadState.discounts || !storeLoadState.settings) {
@@ -67,6 +68,16 @@ function setStoreMessage(message, type) {
     notice.textContent = message;
     notice.className = 'store-notice ' + (type || 'info');
     notice.style.display = 'block';
+}
+
+function trackVisit() {
+    if (!window.db) return;
+    var now = new Date();
+    var monthKey = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+    var visitsRef = db.collection('stats').doc('visits');
+    var update = {};
+    update[monthKey] = firebase.firestore.FieldValue.increment(1);
+    visitsRef.set(update, { merge: true });
 }
 
 function markStoreLoaded(key) {

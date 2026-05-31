@@ -192,7 +192,7 @@ function getSelectedProductIds() {
     var checkboxes = document.querySelectorAll('.product-select:checked');
     var ids = [];
     for (var i = 0; i < checkboxes.length; i++) {
-        ids.push(Number(checkboxes[i].value));
+        ids.push(checkboxes[i].value);
     }
     return ids;
 }
@@ -566,13 +566,29 @@ function renderDashboard() {
         statCard('طلبات هذا الأسبوع', ordersWeek, 'آخر 7 أيام'),
         statCard('طلبات هذا الشهر', ordersMonth, 'آخر 30 يوم'),
         statCard('عدد المنتجات', products.length, 'في المتجر'),
-        statCard('عدد الخصومات', discounts.length, 'الخصومات النشطة')
+        statCard('عدد الخصومات', discounts.length, 'الخصومات النشطة'),
+        statCard('زيارات هذا الشهر', '<span id="monthlyVisits">...</span>', 'عدد الزيارات')
     ].join('');
 
+    fetchMonthlyVisits();
     renderRevenueChart();
     renderStatusChart();
     renderRegionChart();
     renderTopProductsChart();
+}
+
+function fetchMonthlyVisits() {
+    if (!window.db) return;
+    var now = new Date();
+    var monthKey = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+    db.collection('stats').doc('visits').get().then(function (doc) {
+        var count = 0;
+        if (doc.exists && doc.data()[monthKey]) {
+            count = doc.data()[monthKey];
+        }
+        var el = document.getElementById('monthlyVisits');
+        if (el) el.textContent = count;
+    });
 }
 
 function statCard(title, value, subtitle) {
