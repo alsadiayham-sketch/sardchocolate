@@ -155,7 +155,8 @@ function normalizeCustomPackageSet(entry) {
     return {
         chocolateType: String(entry && entry.chocolateType ? entry.chocolateType : 'mixed'),
         filling: String(entry && entry.filling ? entry.filling : 'plain'),
-        qty: Math.max(1, parseInt(entry && entry.qty, 10) || 1)
+        qty: Math.max(1, parseInt(entry && entry.qty, 10) || 1),
+        wrapperColor: String(entry && entry.wrapperColor ? entry.wrapperColor : 'gold')
     };
 }
 
@@ -187,6 +188,48 @@ function isCustomPackageItem(item) {
 function getCustomPackageTitle(item) {
     var setsCount = Array.isArray(item && item.sets) ? item.sets.length : 0;
     return 'علبة مخصصة (' + setsCount + ' تشكيلات)';
+}
+
+function getPackagingTypeLabel(value) {
+    switch (value) {
+        case 'dark': return 'داكن';
+        case 'milk': return 'حليب';
+        case 'white': return 'أبيض';
+        default: return 'مشكل';
+    }
+}
+
+function getPackagingFillingLabel(value) {
+    switch (value) {
+        case 'plain': return 'سادا / بدون حشوة';
+        case 'hazelnut': return 'بندق';
+        case 'caramel': return 'كراميل';
+        case 'pistachio': return 'فستق';
+        case 'coconut': return 'جوز الهند';
+        case 'strawberry': return 'فراولة';
+        case 'orange': return 'برتقال';
+        default: return 'سادا / بدون حشوة';
+    }
+}
+
+function getWrapperColorLabel(value) {
+    switch (value) {
+        case 'gold': return 'ذهبي';
+        case 'silver': return 'فضي';
+        case 'red': return 'أحمر';
+        case 'pink': return 'زهري';
+        case 'purple': return 'بنفسجي';
+        case 'black': return 'أسود';
+        case 'white': return 'أبيض';
+        case 'blue': return 'أزرق';
+        default: return 'ذهبي';
+    }
+}
+
+function getCustomPackageSetsHtml(sets) {
+    return (Array.isArray(sets) ? sets : []).map(function (setItem, index) {
+        return '<span class="custom-package-set-line">تشكيلة ' + (index + 1) + ': ' + getPackagingTypeLabel(setItem.chocolateType) + ' • ' + getPackagingFillingLabel(setItem.filling) + ' • لون: ' + getWrapperColorLabel(setItem.wrapperColor || 'gold') + ' • الكمية ' + (parseInt(setItem.qty, 10) || 1) + '</span>';
+    }).join('');
 }
 
 function hasCustomPricingPending(items) {

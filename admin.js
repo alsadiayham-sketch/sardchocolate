@@ -10,6 +10,7 @@ var unsubscribers = [];
 var charts = {};
 var isInitializing = false;
 
+
 var adminReady = {
     products: false,
     discounts: false,
@@ -520,6 +521,17 @@ function renderOrdersTable() {
 
 function renderOrderDetails(order) {
     var itemsHtml = (order.items || []).map(function (item) {
+        if (item.type === 'custom_package') {
+            var setsHtml = (item.sets || []).map(function (setItem, idx) {
+                var colorHtml = setItem.wrapperColor ? ' • لون التغليف: ' + getWrapperColorLabel(setItem.wrapperColor) : '';
+                return '<div style="margin-right:10px;margin-bottom:4px;">تشكيلة ' + (idx + 1) + ': ' + getPackagingTypeLabel(setItem.chocolateType) + ' / ' + getPackagingFillingLabel(setItem.filling) + ' / الكمية ' + (parseInt(setItem.qty, 10) || 1) + colorHtml + '</div>';
+            }).join('');
+            var packageColorHtml = item.wrapperColor && !(item.sets && item.sets.length && item.sets[0].wrapperColor) ? '<div>لون التغليف: ' + getWrapperColorLabel(item.wrapperColor) + '</div>' : '';
+            var notesHtml = item.notes ? '<div>ملاحظات: ' + item.notes + '</div>' : '';
+            var deliveryHtml = '<div>الاستلام: ' + (item.delivery === 'pickup' ? 'استلام من المصنع' : 'توصيل') + '</div>';
+            var custHtml = '<div>الاسم: ' + (item.customerName || '-') + ' • الهاتف: ' + (item.customerPhone || '-') + (item.customerLocation ? ' • الموقع: ' + item.customerLocation : '') + '</div>';
+            return '<div class="order-item-card"><strong>' + (item.name || 'طرد مخصص') + '</strong>' + packageColorHtml + setsHtml + deliveryHtml + custHtml + notesHtml + '<div>السعر: يحدد لاحقاً</div></div>';
+        }
         return '<div class="order-item-card"><strong>' + item.name + '</strong><div>' + item.brand + ' • ' + item.sizeLabel + '</div><div>الكمية: ' + item.qty + ' • السعر: ' + formatCurrency(item.price) + ' • الإجمالي: ' + formatCurrency(item.lineTotal) + '</div></div>';
     }).join('');
 

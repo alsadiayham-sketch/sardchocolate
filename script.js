@@ -434,45 +434,11 @@ function createDefaultPackagingSet() {
     return {
         chocolateType: 'mixed',
         filling: 'plain',
+        wrapperColor: 'gold',
         qty: 1
     };
 }
 
-function getPackagingTypeLabel(value) {
-    switch (value) {
-        case 'dark': return 'داكن';
-        case 'milk': return 'حليب';
-        case 'white': return 'أبيض';
-        default: return 'مشكل';
-    }
-}
-
-function getPackagingFillingLabel(value) {
-    switch (value) {
-        case 'plain': return 'سادا / بدون حشوة';
-        case 'hazelnut': return 'بندق';
-        case 'caramel': return 'كراميل';
-        case 'pistachio': return 'فستق';
-        case 'coconut': return 'جوز الهند';
-        case 'strawberry': return 'فراولة';
-        case 'orange': return 'برتقال';
-        default: return 'سادا / بدون حشوة';
-    }
-}
-
-function getWrapperColorLabel(value) {
-    switch (value) {
-        case 'gold': return 'ذهبي';
-        case 'silver': return 'فضي';
-        case 'red': return 'أحمر';
-        case 'pink': return 'زهري';
-        case 'purple': return 'بنفسجي';
-        case 'black': return 'أسود';
-        case 'white': return 'أبيض';
-        case 'blue': return 'أزرق';
-        default: return 'ذهبي';
-    }
-}
 
 function buildPackagingOptions(options, selectedValue) {
     return options.map(function (option) {
@@ -498,6 +464,16 @@ function renderPackagingSets() {
         { value: 'strawberry', label: 'فراولة' },
         { value: 'orange', label: 'برتقال' }
     ];
+    var colorOptions = [
+        { value: 'gold', label: 'ذهبي' },
+        { value: 'silver', label: 'فضي' },
+        { value: 'red', label: 'أحمر' },
+        { value: 'pink', label: 'زهري' },
+        { value: 'purple', label: 'بنفسجي' },
+        { value: 'black', label: 'أسود' },
+        { value: 'white', label: 'أبيض' },
+        { value: 'blue', label: 'أزرق' }
+    ];
     container.innerHTML = packagingBuilderSets.map(function (setItem, index) {
         return '<div class="builder-set">'
             + '<div class="builder-set-head"><h5>تشكيلة ' + (index + 1) + '</h5>'
@@ -506,6 +482,7 @@ function renderPackagingSets() {
             + '<div class="builder-set-grid">'
             + '<div class="builder-field"><label>نوع الشوكولاتة</label><select onchange="updatePackagingSetField(' + index + ', \'chocolateType\', this.value)">' + buildPackagingOptions(typeOptions, setItem.chocolateType) + '</select></div>'
             + '<div class="builder-field"><label>الحشوة</label><select onchange="updatePackagingSetField(' + index + ', \'filling\', this.value)">' + buildPackagingOptions(fillingOptions, setItem.filling) + '</select></div>'
+            + '<div class="builder-field"><label>لون التغليف</label><select onchange="updatePackagingSetField(' + index + ', \'wrapperColor\', this.value)">' + buildPackagingOptions(colorOptions, setItem.wrapperColor || 'gold') + '</select></div>'
             + '<div class="builder-field"><label>الكمية</label><input type="number" min="1" value="' + (parseInt(setItem.qty, 10) || 1) + '" onchange="updatePackagingSetField(' + index + ', \'qty\', this.value)"></div>'
             + '</div></div>';
     }).join('');
@@ -560,7 +537,7 @@ function populatePackagingBuilder(item) {
     if (document.getElementById('packagingBuilderTitle')) document.getElementById('packagingBuilderTitle').textContent = 'تعديل العلبة المخصصة';
     if (document.getElementById('packagingBuilderSubmit')) document.getElementById('packagingBuilderSubmit').textContent = 'حفظ التعديلات';
     renderPackagingSets();
-    document.getElementById('packageWrapperColor').value = normalized.wrapperColor;
+    if (document.getElementById('packageWrapperColor')) document.getElementById('packageWrapperColor').value = normalized.wrapperColor;
     document.getElementById('packageNotes').value = normalized.notes;
     document.getElementById('packageCustomerName').value = normalized.customerName;
     document.getElementById('packageCustomerPhone').value = normalized.customerPhone;
@@ -615,7 +592,7 @@ function saveCustomPackageFromBuilder() {
     var packageItem = normalizeCustomPackageItem({
         id: editingCustomPackageId || 'pkg_' + Date.now(),
         sets: packagingBuilderSets,
-        wrapperColor: document.getElementById('packageWrapperColor').value,
+        wrapperColor: 'gold',
         notes: document.getElementById('packageNotes').value,
         delivery: selectedDelivery ? selectedDelivery.value : 'delivery',
         customerName: customerName,
@@ -645,19 +622,13 @@ function editCustomPackage(itemId) {
     window.location.href = 'builder.html?edit=' + encodeURIComponent(itemId);
 }
 
-function getCustomPackageSetsHtml(sets) {
-    return (Array.isArray(sets) ? sets : []).map(function (setItem, index) {
-        return '<span class="custom-package-set-line">تشكيلة ' + (index + 1) + ': ' + getPackagingTypeLabel(setItem.chocolateType) + ' • ' + getPackagingFillingLabel(setItem.filling) + ' • الكمية ' + (parseInt(setItem.qty, 10) || 1) + '</span>';
-    }).join('');
-}
 
 function getCustomPackageDeliveryLabel(item) {
     return item.delivery === 'pickup' ? 'استلام من المصنع' : 'توصيل';
 }
 
 function renderCustomPackageCartItem(item) {
-    var customerParts = ['<span class="custom-package-meta">لون التغليف: ' + getWrapperColorLabel(item.wrapperColor) + '</span>'];
-    customerParts.push('<span class="custom-package-meta">طريقة الاستلام: ' + getCustomPackageDeliveryLabel(item) + '</span>');
+    var customerParts = ['<span class="custom-package-meta">طريقة الاستلام: ' + getCustomPackageDeliveryLabel(item) + '</span>'];
     customerParts.push('<span class="custom-package-meta">الاسم: ' + escapeHtml(item.customerName) + ' • الهاتف: ' + escapeHtml(item.customerPhone) + '</span>');
     if (item.delivery === 'delivery' && item.customerLocation) customerParts.push('<span class="custom-package-meta">الموقع: ' + escapeHtml(item.customerLocation) + '</span>');
     if (item.notes) customerParts.push('<span class="custom-package-note">ملاحظات: ' + escapeHtml(item.notes) + '</span>');
