@@ -33,7 +33,7 @@ window.seedFirestoreData = function(clearExisting) {
             brand: 'سرد',
             category: 'شوكولاتة حليب',
             price: 20,
-            image: 'https://images.unsplash.com/photo-1587132137056-bfbf0166836e?w=400&h=400&fit=crop',
+            image: 'https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=400&h=400&fit=crop',
             description: 'شوكولاتة حليب ناعمة وكريمية بمذاق لا يقاوم',
             status: '',
             inStock: true,
