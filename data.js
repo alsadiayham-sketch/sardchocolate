@@ -28,7 +28,7 @@ function normalizeProduct(product) {
         : [normalizeSizeEntry({ size: product && product.size, unit: product && product.unit, price: product && product.price })];
 
     return {
-        id: Number(product && product.id) || Date.now(),
+        id: String(product && product.id ? product.id : Date.now()),
         name: (product && product.name) || '',
         brand: (product && product.brand) || '',
         category: (product && product.category) || '',
@@ -40,7 +40,7 @@ function normalizeProduct(product) {
 }
 
 function normalizeProducts(list) {
-    return (Array.isArray(list) ? list : []).map(normalizeProduct).sort(function (a, b) { return a.id - b.id; });
+    return (Array.isArray(list) ? list : []).map(normalizeProduct).sort(function (a, b) { return a.id.localeCompare(b.id); });
 }
 
 function normalizeDiscount(discount) {

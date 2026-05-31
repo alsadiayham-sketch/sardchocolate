@@ -117,7 +117,7 @@ function subscribeToCollections() {
     unsubscribers = [];
 
     unsubscribers.push(db.collection('products').onSnapshot(function (snapshot) {
-        products = snapshot.docs.map(function (docSnap) { return normalizeProduct(docSnap.data()); }).sort(function (a, b) { return a.id - b.id; });
+        products = snapshot.docs.map(function (docSnap) { var d = docSnap.data(); d.id = docSnap.id; return normalizeProduct(d); }).sort(function (a, b) { return a.id.localeCompare(b.id); });
         adminReady.products = true;
         renderProductsTable();
         renderDiscountValueOptions();
@@ -129,7 +129,7 @@ function subscribeToCollections() {
     }));
 
     unsubscribers.push(db.collection('discounts').onSnapshot(function (snapshot) {
-        discounts = snapshot.docs.map(function (docSnap) { return normalizeDiscount(docSnap.data()); });
+        discounts = snapshot.docs.map(function (docSnap) { var d = docSnap.data(); d.id = docSnap.id; return normalizeDiscount(d); });
         adminReady.discounts = true;
         renderDiscountsTable();
         checkAdminReady();
@@ -183,7 +183,7 @@ function renderProductsTable() {
     }
 
     tbody.innerHTML = products.map(function (product) {
-        return '<tr><td><input type="checkbox" class="product-select" value="' + product.id + '" onchange="updateBulkBar()"></td><td><img src="' + product.image + '" alt="' + product.name + '" onerror="this.src=\'' + FALLBACK_IMAGE + '\'"></td><td>' + product.name + '</td><td>' + product.brand + '</td><td>' + product.category + '</td><td>' + formatSizes(product) + '</td><td>' + formatPrices(product) + '</td><td>' + (product.discount ? product.discount + '%' : '-') + '</td><td><span class="status-tag ' + (product.status || 'normal') + '">' + statusLabels[product.status || 'normal'] + '</span></td><td class="actions"><button class="btn-edit" onclick="editProduct(' + product.id + ')">تعديل</button><button class="btn-delete" onclick="deleteProduct(' + product.id + ')">حذف</button></td></tr>';
+        return '<tr><td><input type="checkbox" class="product-select" value="' + product.id + '" onchange="updateBulkBar()"></td><td><img src="' + product.image + '" alt="' + product.name + '" onerror="this.src=\'' + FALLBACK_IMAGE + '\'"></td><td>' + product.name + '</td><td>' + product.brand + '</td><td>' + product.category + '</td><td>' + formatSizes(product) + '</td><td>' + formatPrices(product) + '</td><td>' + (product.discount ? product.discount + '%' : '-') + '</td><td><span class="status-tag ' + (product.status || 'normal') + '">' + statusLabels[product.status || 'normal'] + '</span></td><td class="actions"><button class="btn-edit" onclick="editProduct(\'' + product.id + '\')">تعديل</button><button class="btn-delete" onclick="deleteProduct(\'' + product.id + '\')">حذف</button></td></tr>';
     }).join('');
     updateBulkBar();
 }
@@ -306,7 +306,7 @@ function openProductModal(product) {
 }
 
 function editProduct(id) {
-    var product = products.find(function (entry) { return entry.id === id; });
+    var product = products.find(function (entry) { return entry.id === String(id); });
     if (product) openProductModal(product);
 }
 
@@ -326,7 +326,7 @@ async function saveProduct(event) {
     var sizes = collectSizes();
     if (!sizes.length) return alert('أضيفي حجماً واحداً على الأقل مع السعر.');
 
-    var nextId = id ? parseInt(id, 10) : (products.length ? Math.max.apply(null, products.map(function (entry) { return entry.id; })) + 1 : 1);
+    var nextId = id ? id : 'prod_' + Date.now();
 
     // Handle image upload
     var imageUrl = document.getElementById('productImage').value.trim();
@@ -443,13 +443,15 @@ async function saveDiscount(event) {
         if (manualVal) values = [manualVal];
     }
     // For "all" type, values stays empty (applies to everything)
+    var description = document.getElementById('discountDescription').value.trim();
+    if (!description) { alert('يرجى إدخال وصف الخصم.'); return; }
     var discountData = normalizeDiscount({
         id: existingId || String(Date.now()),
         type: type,
         values: values,
         value: values.join(', '),
         percentage: parseInt(document.getElementById('discountPercentage').value || '0', 10),
-        description: document.getElementById('discountDescription').value.trim(),
+        description: description,
         expiresAt: document.getElementById('discountExpiry').value || ''
     });
 

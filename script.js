@@ -103,7 +103,7 @@ function subscribeToStoreData() {
     db.collection('products').orderBy('id').limit(6).get().then(function (snapshot) {
         if (!snapshot.empty) {
             products = snapshot.docs.map(function (docSnap) {
-                return normalizeProduct(docSnap.data());
+                var d = docSnap.data(); d.id = docSnap.id; return normalizeProduct(d);
             });
             syncCartWithProducts();
             markStoreLoaded('products');
@@ -111,8 +111,8 @@ function subscribeToStoreData() {
         // Now subscribe to all products for real-time updates
         unsubscribers.push(db.collection('products').onSnapshot(function (fullSnapshot) {
             products = fullSnapshot.docs.map(function (docSnap) {
-                return normalizeProduct(docSnap.data());
-            }).sort(function (a, b) { return a.id - b.id; });
+                var d = docSnap.data(); d.id = docSnap.id; return normalizeProduct(d);
+            }).sort(function (a, b) { return a.id.localeCompare(b.id); });
             syncCartWithProducts();
             markStoreLoaded('products');
         }, function () {
@@ -123,8 +123,8 @@ function subscribeToStoreData() {
         // Fallback to full subscription if initial fetch fails
         unsubscribers.push(db.collection('products').onSnapshot(function (snapshot) {
             products = snapshot.docs.map(function (docSnap) {
-                return normalizeProduct(docSnap.data());
-            }).sort(function (a, b) { return a.id - b.id; });
+                var d = docSnap.data(); d.id = docSnap.id; return normalizeProduct(d);
+            }).sort(function (a, b) { return a.id.localeCompare(b.id); });
             syncCartWithProducts();
             markStoreLoaded('products');
         }, function () {
@@ -135,7 +135,7 @@ function subscribeToStoreData() {
 
     unsubscribers.push(db.collection('discounts').onSnapshot(function (snapshot) {
         discounts = snapshot.docs.map(function (docSnap) {
-            return normalizeDiscount(docSnap.data());
+            var d = docSnap.data(); d.id = docSnap.id; return normalizeDiscount(d);
         });
         markStoreLoaded('discounts');
     }, function () {
@@ -219,17 +219,17 @@ function checkDiscountBanner() {
         return true;
     });
 
-    var text = '';
     if (activeDiscounts.length) {
-        text = activeDiscounts.map(function (discount) {
+        var text = activeDiscounts.map(function (discount) {
             return discount.description;
         }).join('     |     ');
+        document.body.classList.add('has-banner');
+        banner.style.display = 'block';
+        textNode.textContent = text + '     |     ' + text;
     } else {
-        text = '🍫 أجود أنواع الشوكولاتة الفاخرة     |     توصيل لجميع المناطق     |     صمم علبتك المخصصة الآن';
+        banner.style.display = 'none';
+        document.body.classList.remove('has-banner');
     }
-    document.body.classList.add('has-banner');
-    banner.style.display = 'block';
-    textNode.textContent = text + '     |     ' + text;
 }
 
 function getFilteredProducts(filter) {
