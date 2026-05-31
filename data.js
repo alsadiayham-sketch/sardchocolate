@@ -206,11 +206,12 @@ function getTotalDisplayText(total, hasPending) {
 function normalizeCartItems(items, products) {
     return (Array.isArray(items) ? items : []).map(function (item) {
         if (isCustomPackageItem(item)) return normalizeCustomPackageItem(item);
-        var product = Array.isArray(products) ? products.find(function (entry) { return entry.id === Number(item.id); }) : null;
+        var itemId = item.id;
+        var product = Array.isArray(products) ? products.find(function (entry) { return String(entry.id) === String(itemId); }) : null;
         var sizesLength = product && Array.isArray(product.sizes) && product.sizes.length ? product.sizes.length : 1;
         var safeSizeIdx = Math.max(0, Math.min(sizesLength - 1, parseInt(item.sizeIdx, 10) || 0));
         return {
-            id: Number(item.id),
+            id: itemId,
             sizeIdx: safeSizeIdx,
             qty: Math.max(1, parseInt(item.qty, 10) || 1),
             price: Math.max(0, Number(item.price) || 0)

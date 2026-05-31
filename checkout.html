@@ -135,9 +135,9 @@
                     clearTimeout(timeout);
 
                     if (!productsSnap.empty) {
-                        products = productsSnap.docs.map(function (docSnap) { return normalizeProduct(docSnap.data()); }).sort(function (a, b) { return a.id - b.id; });
+                        products = productsSnap.docs.map(function (docSnap) { var d = docSnap.data(); d.id = docSnap.id; return normalizeProduct(d); }).sort(function (a, b) { return String(a.id).localeCompare(String(b.id)); });
                     }
-                    discounts = discountsSnap.docs.map(function (docSnap) { return normalizeDiscount(docSnap.data()); });
+                    discounts = discountsSnap.docs.map(function (docSnap) { var d = docSnap.data(); d.id = docSnap.id; return normalizeDiscount(d); });
                     siteSettings = normalizeSettings(settingsSnap.exists ? settingsSnap.data() : DEFAULT_SITE_SETTINGS);
                     cart = normalizeCartItems(JSON.parse(localStorage.getItem('sardchocolate_cart') || '[]'), products);
                     saveCart();
