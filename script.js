@@ -814,10 +814,16 @@ function flyToCart(imgElement, product) {
     var imgRect = imgElement.getBoundingClientRect();
     var cartRect = cartIcon.getBoundingClientRect();
 
-    // Create bubble element
+    // Create bubble element with product image
     var bubble = document.createElement('div');
     bubble.className = 'cart-bubble';
-    bubble.textContent = product.name;
+    var bubbleImg = document.createElement('img');
+    bubbleImg.src = imgElement.src;
+    bubbleImg.style.width = '100%';
+    bubbleImg.style.height = '100%';
+    bubbleImg.style.objectFit = 'cover';
+    bubbleImg.style.borderRadius = '50%';
+    bubble.appendChild(bubbleImg);
     document.body.appendChild(bubble);
 
     // Position at product center
