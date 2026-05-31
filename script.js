@@ -222,10 +222,10 @@ function checkDiscountBanner() {
     if (activeDiscounts.length) {
         var text = activeDiscounts.map(function (discount) {
             return discount.description;
-        }).join('     |     ');
+        }).join('   \uD83C\uDF6B \uD83C\uDF81 \uD83C\uDF6B   ');
         document.body.classList.add('has-banner');
         banner.style.display = 'block';
-        textNode.textContent = text + '     |     ' + text;
+        textNode.textContent = text + '   \uD83C\uDF6B \uD83C\uDF81 \uD83C\uDF6B   ' + text;
     } else {
         banner.style.display = 'none';
         document.body.classList.remove('has-banner');
