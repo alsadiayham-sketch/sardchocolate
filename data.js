@@ -56,7 +56,7 @@ function normalizeDiscount(discount) {
         value: values.join(', '),
         values: values,
         percentage: Number(discount && discount.percentage) || 0,
-        description: String(discount && discount.description ? discount.description : '').trim(),
+        description: String(discount && (discount.description || discount.message) ? (discount.description || discount.message) : '').trim(),
         expiresAt: discount && discount.expiresAt ? discount.expiresAt : ''
     };
 }
