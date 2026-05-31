@@ -42,20 +42,20 @@ body {
     padding: 10px 0;
     z-index: 1100;
     overflow: hidden;
+    direction: ltr;
 }
 
 .banner-scroll {
     display: inline-block;
     white-space: nowrap;
-    animation: scrollBanner 25s linear infinite;
+    animation: scrollBanner 20s linear infinite;
     font-weight: 700;
     font-size: 0.95rem;
-    padding-right: 100vw;
 }
 
 @keyframes scrollBanner {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
 }
 
 body.has-banner .navbar { top: 40px; }
