@@ -1,0 +1,160 @@
+﻿<!DOCTYPE html>
+<html>
+<head><title>Migration</title></head>
+<body>
+<h2>Migration Script</h2>
+<pre id="log"></pre>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script>
+var log = document.getElementById('log');
+function logMsg(msg) { log.textContent += msg + '\n'; console.log(msg); }
+
+// Source Firebase (dimaboutique)
+var sourceConfig = {
+    apiKey: 'AIzaSyAIsq4QV6wxwMb8phPa3tU14p2NRSXvTdY',
+    authDomain: 'dimaboutique-b4f16.firebaseapp.com',
+    projectId: 'dimaboutique-b4f16',
+    storageBucket: 'dimaboutique-b4f16.firebasestorage.app',
+    messagingSenderId: '438611658146',
+    appId: '1:438611658146:web:83b1a97cfc42bd12aadefb'
+};
+
+// Target Firebase (sardchocolate-a11c3)
+var targetConfig = {
+    apiKey: "AIzaSyA_3XBuDhiI2p6iOxsr2S6dO_APxXdA9DI",
+    authDomain: "sardchocolate-a11c3.firebaseapp.com",
+    databaseURL: "https://sardchocolate-a11c3-default-rtdb.firebaseio.com",
+    projectId: "sardchocolate-a11c3",
+    storageBucket: "sardchocolate-a11c3.firebasestorage.app",
+    messagingSenderId: "983073085026",
+    appId: "1:983073085026:web:8492ae302b7a6ee3b3e33b",
+    measurementId: "G-2YYWSDMBY9"
+};
+
+var IMGBB_KEY = 'de10f7f874d9dbf904fe0cd0ad00332d';
+
+var sourceApp = firebase.initializeApp(sourceConfig, 'source');
+var targetApp = firebase.initializeApp(targetConfig, 'target');
+var sourceDb = sourceApp.firestore();
+var targetDb = targetApp.firestore();
+
+// Upload base64 image to imgbb
+function uploadToImgbb(base64Data) {
+    // Strip data:image prefix if present
+    var cleanData = base64Data;
+    if (cleanData.indexOf('data:') === 0) {
+        cleanData = cleanData.split(',')[1];
+    }
+    var formData = new FormData();
+    formData.append('key', IMGBB_KEY);
+    formData.append('image', cleanData);
+    return fetch('https://api.imgbb.com/1/upload', {
+        method: 'POST',
+        body: formData
+    }).then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.success) return data.data.url;
+        logMsg('imgbb error: ' + JSON.stringify(data));
+        return base64Data; // fallback to original
+    }).catch(function(err) {
+        logMsg('imgbb upload failed: ' + err.message);
+        return base64Data;
+    });
+}
+
+// Check if string is base64 image
+function isBase64Image(str) {
+    return str && (str.indexOf('data:image') === 0 || (str.length > 500 && /^[A-Za-z0-9+/=]+$/.test(str.substring(0, 100))));
+}
+
+async function migrate() {
+    logMsg('Starting migration...');
+    
+    // 1. Read products from source
+    logMsg('Reading products from source...');
+    var productsSnap = await sourceDb.collection('projects').doc('sardchocolate').collection('products').get();
+    logMsg('Found ' + productsSnap.size + ' products');
+    
+    // 2. Read settings from source
+    logMsg('Reading settings...');
+    var settingsSnap = await sourceDb.collection('projects').doc('sardchocolate').collection('siteSettings').get();
+    logMsg('Found ' + settingsSnap.size + ' settings docs');
+    
+    // 3. Read discounts
+    logMsg('Reading discounts...');
+    var discountsSnap = await sourceDb.collection('projects').doc('sardchocolate').collection('discounts').get();
+    logMsg('Found ' + discountsSnap.size + ' discounts');
+    
+    // 4. Read orders
+    logMsg('Reading orders...');
+    var ordersSnap = await sourceDb.collection('projects').doc('sardchocolate').collection('orders').get();
+    logMsg('Found ' + ordersSnap.size + ' orders');
+    
+    // 5. Process products - upload images to imgbb
+    logMsg('Processing products and uploading images to imgbb...');
+    var products = [];
+    productsSnap.forEach(function(doc) {
+        products.push({ id: doc.id, data: doc.data() });
+    });
+    
+    for (var i = 0; i < products.length; i++) {
+        var p = products[i];
+        logMsg('Processing product ' + (i+1) + '/' + products.length + ': ' + (p.data.name || p.id));
+        
+        // Upload main image
+        if (p.data.image && isBase64Image(p.data.image)) {
+            logMsg('  Uploading image to imgbb...');
+            p.data.image = await uploadToImgbb(p.data.image);
+            logMsg('  Image uploaded: ' + p.data.image.substring(0, 60) + '...');
+        }
+        
+        // Upload additional images if any
+        if (p.data.images && Array.isArray(p.data.images)) {
+            for (var j = 0; j < p.data.images.length; j++) {
+                if (isBase64Image(p.data.images[j])) {
+                    p.data.images[j] = await uploadToImgbb(p.data.images[j]);
+                }
+            }
+        }
+    }
+    
+    // 6. Write products to target (root level)
+    logMsg('Writing products to target...');
+    for (var i = 0; i < products.length; i++) {
+        await targetDb.collection('products').doc(products[i].id).set(products[i].data);
+        logMsg('  Wrote product: ' + (products[i].data.name || products[i].id));
+    }
+    
+    // 7. Write settings to target
+    logMsg('Writing settings to target...');
+    settingsSnap.forEach(function(doc) {
+        targetDb.collection('siteSettings').doc(doc.id).set(doc.data());
+    });
+    
+    // 8. Write discounts to target
+    logMsg('Writing discounts to target...');
+    discountsSnap.forEach(function(doc) {
+        targetDb.collection('discounts').doc(doc.id).set(doc.data());
+    });
+    
+    // 9. Write orders to target
+    logMsg('Writing orders to target...');
+    ordersSnap.forEach(function(doc) {
+        targetDb.collection('orders').doc(doc.id).set(doc.data());
+    });
+    
+    logMsg('\n=== MIGRATION COMPLETE ===');
+    logMsg('Products: ' + products.length);
+    logMsg('Target project: sardchocolate-a11c3');
+    logMsg('Collections: products, siteSettings, discounts, orders (all at root level)');
+    window.migrationDone = true;
+}
+
+migrate().catch(function(err) {
+    logMsg('ERROR: ' + err.message);
+    console.error(err);
+});
+</script>
+</body>
+</html>

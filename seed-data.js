@@ -2,8 +2,6 @@
 // Run via: window.seedFirestoreData(true)
 
 window.seedFirestoreData = function(clearExisting) {
-    var db = firebase.firestore();
-    var projectRef = db.collection('projects').doc('sardchocolate');
 
     var products = [
         {
@@ -301,9 +299,9 @@ window.seedFirestoreData = function(clearExisting) {
 
     function doSeed() {
         var batch = db.batch();
-        var productsRef = projectRef.collection('products');
-        var discountsRef = projectRef.collection('discounts');
-        var settingsRef = projectRef.collection('settings');
+        var productsRef = db.collection('products');
+        var discountsRef = db.collection('discounts');
+        var settingsRef = db.collection('settings');
 
         if (clearExisting) {
             console.log('Seeding with clear mode - adding all products...');
@@ -329,12 +327,12 @@ window.seedFirestoreData = function(clearExisting) {
     }
 
     if (clearExisting) {
-        return projectRef.collection('products').get().then(function(snapshot) {
+        return db.collection('products').get().then(function(snapshot) {
             var deleteBatch = db.batch();
             snapshot.forEach(function(doc) { deleteBatch.delete(doc.ref); });
             return deleteBatch.commit();
         }).then(function() {
-            return projectRef.collection('discounts').get();
+            return db.collection('discounts').get();
         }).then(function(snapshot) {
             var deleteBatch = db.batch();
             snapshot.forEach(function(doc) { deleteBatch.delete(doc.ref); });
