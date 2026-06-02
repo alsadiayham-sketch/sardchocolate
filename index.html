@@ -69,6 +69,7 @@
             <p class="hero-tagline">تغليف مخصص لكل المناسبات مع توصيل إلى الضفة والقدس والداخل</p>
             <a href="#products" class="btn-primary">تسوق الآن</a>
             <a href="builder.html" class="btn-primary" style="margin-top:10px;background:var(--primary-dark);color:#fff;">🎁 صمم علبتك المخصصة</a>
+            <button id="installBtn" class="btn-primary" style="margin-top:10px;background:#333;color:#fff;display:none;" onclick="installPWA()">📲 حمّل التطبيق</button>
         </div>
     </section>
 
@@ -233,6 +234,23 @@
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/service-worker.js');
     }
+    var deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('installBtn').style.display = 'inline-block';
+    });
+    function installPWA() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(result) {
+            deferredPrompt = null;
+            document.getElementById('installBtn').style.display = 'none';
+        });
+    }
+    window.addEventListener('appinstalled', function() {
+        document.getElementById('installBtn').style.display = 'none';
+    });
     </script>
 </body>
 </html>
