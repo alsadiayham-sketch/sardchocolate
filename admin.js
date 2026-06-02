@@ -477,6 +477,9 @@ function loadSettingsForm() {
     document.getElementById('settingAbout').value = siteSettings.aboutText || '';
     document.getElementById('settingInstagram').value = siteSettings.instagramLink || '';
     document.getElementById('settingTiktok').value = siteSettings.tiktokLink || '';
+    document.getElementById('settingBankName').value = siteSettings.bankName || '';
+    document.getElementById('settingBankHolder').value = siteSettings.bankHolder || '';
+    document.getElementById('settingBankIban').value = siteSettings.bankIban || '';
 }
 
 async function saveSettingsForm(event) {
@@ -486,7 +489,10 @@ async function saveSettingsForm(event) {
         heroSubtitle: document.getElementById('settingHero').value,
         aboutText: document.getElementById('settingAbout').value,
         instagramLink: document.getElementById('settingInstagram').value,
-        tiktokLink: document.getElementById('settingTiktok').value
+        tiktokLink: document.getElementById('settingTiktok').value,
+        bankName: document.getElementById('settingBankName').value,
+        bankHolder: document.getElementById('settingBankHolder').value,
+        bankIban: document.getElementById('settingBankIban').value
     });
     setAdminLoading(true);
     await db.collection('settings').doc('config').set(siteSettings, { merge: true });

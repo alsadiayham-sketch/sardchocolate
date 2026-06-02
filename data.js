@@ -85,7 +85,10 @@ function normalizeSettings(settings) {
         heroSubtitle: String(source.heroSubtitle || DEFAULT_SITE_SETTINGS.heroSubtitle),
         aboutText: String(source.aboutText || DEFAULT_SITE_SETTINGS.aboutText),
         instagramLink: String(source.instagramLink || DEFAULT_SITE_SETTINGS.instagramLink),
-        tiktokLink: String(source.tiktokLink || DEFAULT_SITE_SETTINGS.tiktokLink)
+        tiktokLink: String(source.tiktokLink || DEFAULT_SITE_SETTINGS.tiktokLink),
+        bankName: String(source.bankName || ''),
+        bankHolder: String(source.bankHolder || ''),
+        bankIban: String(source.bankIban || '')
     };
 }
 
