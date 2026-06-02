@@ -6,6 +6,11 @@
     <title>Sard Chocolate | إتمام الطلب</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" href="logo.png">
+    <meta name="theme-color" content="#1A8C8C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <style>
         .checkout-page { min-height: 100vh; padding: 100px 20px 60px; background: var(--bg); }
         .checkout-container { max-width: 900px; margin: 0 auto; }
@@ -59,6 +64,13 @@
         .btn-whatsapp-order { width: 100%; padding: 14px; background: #25d366; color: white; border: none; border-radius: 12px; font-family: 'Tajawal', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: var(--transition); margin-top: 10px; text-decoration: none; display: block; text-align: center; }
         .btn-whatsapp-order:hover { background: #1da851; }
         .btn-whatsapp-order:disabled { opacity: 0.6; cursor: wait; }
+        .btn-stripe-pay { width: 100%; padding: 14px; background: #635bff; color: white; border: none; border-radius: 12px; font-family: 'Tajawal', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; transition: var(--transition); margin-top: 10px; text-decoration: none; display: block; text-align: center; }
+        .btn-stripe-pay:hover { background: #4f46e5; }
+        .btn-stripe-pay:disabled { opacity: 0.6; cursor: wait; }
+        .payment-methods-label { font-size: 0.9rem; font-weight: 700; color: var(--primary-dark); margin-top: 18px; margin-bottom: 8px; text-align: center; }
+        .payment-divider { display: flex; align-items: center; gap: 10px; margin: 12px 0; }
+        .payment-divider span { font-size: 0.85rem; color: var(--text-light); white-space: nowrap; }
+        .payment-divider::before, .payment-divider::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
         .back-link { display: inline-block; margin-bottom: 20px; color: var(--primary); text-decoration: none; font-weight: 600; }
         .back-link:hover { text-decoration: underline; }
         .empty-checkout { text-align: center; padding: 60px; background: white; border-radius: var(--radius); box-shadow: var(--shadow); }
@@ -229,7 +241,9 @@
             html += '<div class="summary-row"><span class="label">المجموع الفرعي:</span><span>' + getTotalDisplayText(subtotal, hasPending) + '</span></div>';
             html += '<div class="summary-row"><span class="label">التوصيل:</span><span>' + getDeliveryCostLabel() + '</span></div>';
             html += '<div class="summary-row total"><span>المجموع:</span><span>' + getTotalDisplayText(getTotal(), hasPending) + '</span></div>';
-            html += '<button type="button" class="btn-whatsapp-order" id="confirmOrderBtn" onclick="confirmOrder()">حفظ الطلب</button>';
+            html += '<button type="button" class="btn-whatsapp-order" id="confirmOrderBtn" onclick="confirmOrder()">📱 الدفع عند الاستلام (واتساب)</button>';
+            html += '<div class="payment-divider"><span>أو</span></div>';
+            html += '<button type="button" class="btn-stripe-pay" id="stripePayBtn" onclick="payWithStripe()">💳 الدفع الآن (بطاقة / Apple Pay)</button>';
             html += '</div></div></div></div>';
             container.innerHTML = html;
             restoreFormValues(formData);
@@ -460,6 +474,70 @@
                 setStatus('');
             });
         }
+
+        function payWithStripe() {
+            var customerName = document.getElementById('custName').value.trim();
+            var customerPhone = document.getElementById('custPhone').value.trim();
+            if (!customerName || !customerPhone) return alert('الرجاء إدخال الاسم ورقم الهاتف');
+            if (customerPhone.length < 9 || customerPhone.length > 14) return alert('رقم الهاتف غير صحيح');
+            if (selectedDelivery === 'delivery') {
+                if (!selectedRegion) return alert('الرجاء اختيار المنطقة');
+                var address = document.getElementById('custAddress').value.trim();
+                if (!address) return alert('الرجاء إدخال عنوان التوصيل');
+            }
+
+            var button = document.getElementById('stripePayBtn');
+            button.disabled = true;
+            button.textContent = 'جاري التحويل للدفع...';
+
+            var order = buildOrder();
+            if (!window.db) {
+                alert('تعذر الاتصال بقاعدة البيانات حالياً، حاولي مرة أخرى.');
+                button.disabled = false;
+                button.textContent = '💳 الدفع الآن (بطاقة / Apple Pay)';
+                return;
+            }
+
+            order.paymentMethod = 'stripe';
+            order.paymentStatus = 'pending';
+
+            db.collection('orders').doc(order.id).set(order).then(function () {
+                localStorage.setItem('sardchocolate_last_order', JSON.stringify(order));
+                var items = [];
+                cart.forEach(function (item) {
+                    if (item.type === 'custom_package') return;
+                    var product = products.find(function (p) { return p.id === item.id; });
+                    if (!product) return;
+                    var priceInfo = getFinalPrice(product, item.sizeIdx, discounts);
+                    items.push({ name: product.name, price: Math.round(priceInfo.final * 100), qty: item.qty });
+                });
+                var deliveryCost = getDeliveryCost();
+                return fetch('/functions/create-checkout-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ items: items, deliveryCost: Math.round(deliveryCost * 100), orderId: order.id })
+                });
+            }).then(function (res) {
+                return res.json();
+            }).then(function (data) {
+                if (data.url) {
+                    localStorage.setItem('sardchocolate_cart', '[]');
+                    window.location.href = data.url;
+                } else {
+                    throw new Error(data.error || 'Stripe error');
+                }
+            }).catch(function (error) {
+                console.error(error);
+                alert('تعذر تحويلك لصفحة الدفع. حاولي مرة أخرى أو اختاري الدفع عند الاستلام.');
+                button.disabled = false;
+                button.textContent = '💳 الدفع الآن (بطاقة / Apple Pay)';
+            });
+        }
+    </script>
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js');
+    }
     </script>
 </body>
 </html>
