@@ -1,5 +1,5 @@
-﻿var ADMIN_USER = 'Sard';
-var ADMIN_PASS = '5555';
+﻿var ADMIN_USER = '';
+var ADMIN_PASS = '';
 var FALLBACK_IMAGE = "data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27400%27 height=%27400%27 viewBox=%270 0 400 400%27%3E%3Crect fill=%27%234a2c17%27 width=%27400%27 height=%27400%27/%3E%3Ctext fill=%27%23d4a574%27 font-family=%27Arial%27 font-size=%2740%27 x=%2750%25%27 y=%2745%25%27 text-anchor=%27middle%27%3E🍫%3C/text%3E%3Ctext fill=%27%23d4a574%27 font-family=%27Arial%27 font-size=%2720%27 x=%2750%25%27 y=%2760%25%27 text-anchor=%27middle%27%3ESard Chocolate%3C/text%3E%3C/svg%3E";
 
 var products = [];
@@ -19,11 +19,18 @@ var adminReady = {
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-    if (sessionStorage.getItem('sardchocolate_admin') === 'true') {
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('adminPanel').style.display = 'block';
-        initializeAdmin();
-    }
+    firebase.database().ref('users/admins/sard').once('value').then(function (snap) {
+        var creds = snap.val();
+        if (creds) {
+            ADMIN_USER = creds.username;
+            ADMIN_PASS = creds.password;
+        }
+        if (sessionStorage.getItem('sardchocolate_admin') === 'true') {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            initializeAdmin();
+        }
+    });
 });
 
 function setAdminLoading(loading) {
