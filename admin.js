@@ -5,17 +5,32 @@ var FALLBACK_IMAGE = "data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/
 var products = [];
 var discounts = [];
 var orders = [];
+var staffAccounts = [];
 var siteSettings = normalizeSettings(DEFAULT_SITE_SETTINGS);
 var unsubscribers = [];
 var charts = {};
 var isInitializing = false;
-
+var ORDER_STATUS_OPTIONS = ['new', 'packaging', 'ready', 'delivering', 'completed', 'cancelled'];
+var ORDER_STATUS_LABELS = {
+    new: 'جديد',
+    packaging: 'قيد التغليف',
+    ready: 'جاهز للتوصيل',
+    delivering: 'قيد التوصيل',
+    completed: 'مكتمل',
+    cancelled: 'ملغي',
+    processing: 'قيد المعالجة'
+};
+var STAFF_ROLE_LABELS = {
+    worker: 'عامل تغليف',
+    driver: 'سائق توصيل'
+};
 
 var adminReady = {
     products: false,
     discounts: false,
     orders: false,
-    settings: false
+    settings: false,
+    staff: false
 };
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -85,6 +100,7 @@ function switchTab(tab, button) {
     if (button) button.classList.add('active');
     if (tab === 'dashboard') renderDashboard();
     if (tab === 'orders') renderOrdersTable();
+    if (tab === 'staff') renderStaffTable();
 }
 
 async function initializeAdmin() {
@@ -102,6 +118,8 @@ async function initializeAdmin() {
 
     try {
         await ensureSeedIfEmpty();
+        await ensureStaffSeeded();
+        resetAdminReady();
         subscribeToCollections();
     } catch (error) {
         console.error(error);
@@ -118,6 +136,37 @@ async function ensureSeedIfEmpty() {
         setAdminStatus('المتجر فارغ، جاري تنفيذ Seed Data تلقائياً...', 'warning');
         await seedFirestoreData(false);
     }
+}
+
+async function ensureStaffSeeded() {
+    var staffRef = firebase.database().ref('users/staff');
+    var snapshot = await staffRef.once('value');
+    var existing = snapshot.val() || {};
+    var seeds = {
+        worker1: { username: 'worker1', password: '1234', role: 'worker', name: 'عامل تجريبي' },
+        driver1: { username: 'driver1', password: '1234', role: 'driver', name: 'سائق تجريبي' }
+    };
+    var updates = {};
+
+    Object.keys(seeds).forEach(function (id) {
+        if (!existing[id]) {
+            updates[id] = seeds[id];
+        }
+    });
+
+    if (Object.keys(updates).length) {
+        await staffRef.update(updates);
+    }
+}
+
+function resetAdminReady() {
+    adminReady = {
+        products: false,
+        discounts: false,
+        orders: false,
+        settings: false,
+        staff: false
+    };
 }
 
 function subscribeToCollections() {
@@ -173,10 +222,40 @@ function subscribeToCollections() {
         setAdminStatus('تعذر تحميل الإعدادات.', 'error');
         setAdminLoading(false);
     }));
+
+    var staffRef = firebase.database().ref('users/staff');
+    var staffHandler = function (snapshot) {
+        var entries = snapshot.val() || {};
+        staffAccounts = Object.keys(entries).map(function (id) {
+            var account = entries[id] || {};
+            return {
+                id: id,
+                username: String(account.username || ''),
+                password: String(account.password || ''),
+                role: account.role === 'driver' ? 'driver' : 'worker',
+                name: String(account.name || '')
+            };
+        }).sort(function (a, b) {
+            if (a.role !== b.role) return a.role.localeCompare(b.role);
+            return a.name.localeCompare(b.name, 'ar');
+        });
+        adminReady.staff = true;
+        renderStaffTable();
+        checkAdminReady();
+    };
+
+    staffRef.on('value', staffHandler, function (error) {
+        console.error(error);
+        setAdminStatus('تعذر تحميل الموظفين.', 'error');
+        setAdminLoading(false);
+    });
+    unsubscribers.push(function () {
+        staffRef.off('value', staffHandler);
+    });
 }
 
 function checkAdminReady() {
-    if (adminReady.products && adminReady.discounts && adminReady.orders && adminReady.settings) {
+    if (adminReady.products && adminReady.discounts && adminReady.orders && adminReady.settings && adminReady.staff) {
         setAdminLoading(false);
         setAdminStatus('تمت مزامنة البيانات بنجاح.', 'success');
     }
@@ -478,6 +557,72 @@ async function deleteDiscount(id) {
     setAdminStatus('تم حذف الخصم.', 'success');
 }
 
+function renderStaffTable() {
+    var tbody = document.getElementById('staffTableBody');
+    if (!tbody) return;
+    if (!staffAccounts.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">لا يوجد موظفون مضافون حالياً.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = staffAccounts.map(function (staff) {
+        return '<tr><td>' + escapeHtml(staff.name || '-') + '</td><td>' + escapeHtml(staff.username || '-') + '</td><td><span class="role-badge ' + staff.role + '">' + STAFF_ROLE_LABELS[staff.role] + '</span></td><td>' + escapeHtml(staff.password || '-') + '</td><td>' + escapeHtml(staff.id) + '</td><td class="actions"><button class="btn-edit" onclick="editStaff(\'' + staff.id + '\')">تعديل</button><button class="btn-delete" onclick="deleteStaff(\'' + staff.id + '\')">حذف</button></td></tr>';
+    }).join('');
+}
+
+function openStaffModal(staff) {
+    document.getElementById('staffModalTitle').textContent = staff ? 'تعديل موظف' : 'إضافة موظف';
+    document.getElementById('staffId').value = staff ? staff.id : '';
+    document.getElementById('staffName').value = staff ? staff.name : '';
+    document.getElementById('staffUsername').value = staff ? staff.username : '';
+    document.getElementById('staffPassword').value = staff ? staff.password : '';
+    document.getElementById('staffRole').value = staff ? staff.role : 'worker';
+    document.getElementById('staffModal').style.display = 'flex';
+}
+
+function editStaff(id) {
+    var staff = staffAccounts.find(function (entry) { return entry.id === id; });
+    if (staff) openStaffModal(staff);
+}
+
+async function saveStaff(event) {
+    event.preventDefault();
+    var id = document.getElementById('staffId').value || firebase.database().ref('users/staff').push().key;
+    var staffData = {
+        name: document.getElementById('staffName').value.trim(),
+        username: document.getElementById('staffUsername').value.trim(),
+        password: document.getElementById('staffPassword').value.trim(),
+        role: document.getElementById('staffRole').value === 'driver' ? 'driver' : 'worker'
+    };
+
+    if (!staffData.name || !staffData.username || !staffData.password) {
+        alert('يرجى تعبئة جميع الحقول.');
+        return;
+    }
+
+    var hasDuplicateUsername = staffAccounts.some(function (entry) {
+        return entry.username === staffData.username && entry.id !== id;
+    });
+    if (hasDuplicateUsername) {
+        alert('اسم المستخدم مستخدم بالفعل لموظف آخر.');
+        return;
+    }
+
+    setAdminLoading(true);
+    await firebase.database().ref('users/staff/' + id).set(staffData);
+    setAdminLoading(false);
+    closeModal('staffModal');
+    setAdminStatus('تم حفظ بيانات الموظف.', 'success');
+}
+
+async function deleteStaff(id) {
+    if (!confirm('هل تريد حذف هذا الموظف؟')) return;
+    setAdminLoading(true);
+    await firebase.database().ref('users/staff/' + id).remove();
+    setAdminLoading(false);
+    setAdminStatus('تم حذف الموظف.', 'success');
+}
+
 function loadSettingsForm() {
     document.getElementById('settingWhatsappNumber').value = siteSettings.whatsappNumber || '';
     document.getElementById('settingHero').value = siteSettings.heroSubtitle || '';
@@ -513,7 +658,8 @@ function renderOrdersTable() {
     var statusFilter = document.getElementById('orderStatusFilter') ? document.getElementById('orderStatusFilter').value : 'all';
 
     var filteredOrders = orders.filter(function (order) {
-        var matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+        var effectiveStatus = getEffectiveOrderStatus(order);
+        var matchesStatus = statusFilter === 'all' || effectiveStatus === statusFilter;
         var haystack = (String(order.customerName || '') + ' ' + String(order.customerPhone || '')).toLowerCase();
         return matchesStatus && (!search || haystack.indexOf(search) >= 0);
     }).sort(function (a, b) {
@@ -528,7 +674,9 @@ function renderOrdersTable() {
     tbody.innerHTML = filteredOrders.map(function (order) {
         var itemsCount = (order.items || []).reduce(function (sum, item) { return sum + (Number(item.qty) || 0); }, 0);
         var deliveryText = order.delivery === 'pickup' ? 'استلام' : (order.region ? DELIVERY_REGION_LABEL(order.region) : 'توصيل');
-        return '<tr class="order-main-row" onclick="toggleOrderDetails(\'' + order.id + '\')"><td>' + order.id + '</td><td>' + formatDateTime(order.date) + '</td><td>' + (order.customerName || '-') + '</td><td>' + (order.customerPhone || '-') + '</td><td>' + itemsCount + '</td><td>' + formatCurrency(order.total) + '</td><td>' + deliveryText + '</td><td><select class="order-status-select" onclick="event.stopPropagation()" onchange="updateOrderStatus(\'' + order.id + '\', this.value)">' + ['new', 'processing', 'completed', 'cancelled'].map(function (status) { return '<option value="' + status + '" ' + (order.status === status ? 'selected' : '') + '>' + ORDER_STATUS_LABEL(status) + '</option>'; }).join('') + '</select></td></tr><tr class="order-details-row" id="details-' + order.id + '" style="display:none;"><td colspan="8">' + renderOrderDetails(order) + '</td></tr>';
+        var orderKey = String(order.id || order._docId || '');
+        var effectiveStatus = getEffectiveOrderStatus(order);
+        return '<tr class="order-main-row" onclick="toggleOrderDetails(\'' + orderKey + '\')"><td>' + orderKey + '</td><td>' + formatDateTime(order.date) + '</td><td>' + (order.customerName || '-') + '</td><td>' + (order.customerPhone || '-') + '</td><td>' + itemsCount + '</td><td>' + formatCurrency(order.total) + '</td><td>' + deliveryText + '</td><td><select class="order-status-select" onclick="event.stopPropagation()" onchange="updateOrderStatus(\'' + orderKey + '\', this.value)">' + ORDER_STATUS_OPTIONS.map(function (status) { return '<option value="' + status + '" ' + (effectiveStatus === status ? 'selected' : '') + '>' + ORDER_STATUS_LABEL(status) + '</option>'; }).join('') + '</select></td></tr><tr class="order-details-row" id="details-' + orderKey + '" style="display:none;"><td colspan="8">' + renderOrderDetails(order) + '</td></tr>';
     }).join('');
 }
 
@@ -565,7 +713,12 @@ async function updateOrderStatus(orderId, status) {
 }
 
 function ORDER_STATUS_LABEL(status) {
-    return { new: 'جديد', processing: 'قيد المعالجة', completed: 'مكتمل', cancelled: 'ملغي' }[status] || status;
+    return ORDER_STATUS_LABELS[status] || status;
+}
+
+function getEffectiveOrderStatus(order) {
+    var status = order && order.status;
+    return status === 'processing' ? 'packaging' : (status || 'new');
 }
 
 function DELIVERY_REGION_LABEL(region) {
@@ -573,10 +726,13 @@ function DELIVERY_REGION_LABEL(region) {
 }
 
 function renderDashboard() {
-    var completedOrders = orders.filter(function (order) { return order.status === 'completed'; });
+    var completedOrders = orders.filter(function (order) { return getEffectiveOrderStatus(order) === 'completed'; });
     var totalRevenue = completedOrders.reduce(function (sum, order) { return sum + (Number(order.total) || 0); }, 0);
     var totalOrders = orders.length;
-    var pendingOrders = orders.filter(function (order) { return order.status === 'new' || order.status === 'processing'; }).length;
+    var pendingOrders = orders.filter(function (order) {
+        var status = getEffectiveOrderStatus(order);
+        return status !== 'completed' && status !== 'cancelled';
+    }).length;
     var completedCount = completedOrders.length;
     var weekStart = new Date();
     weekStart.setDate(weekStart.getDate() - 7);
@@ -588,7 +744,7 @@ function renderDashboard() {
     document.getElementById('statsGrid').innerHTML = [
         statCard('إجمالي الإيراد', formatCurrency(totalRevenue), 'من الطلبات المكتملة'),
         statCard('إجمالي الطلبات', totalOrders, 'كل الحالات'),
-        statCard('الطلبات المعلقة', pendingOrders, 'جديد + قيد المعالجة'),
+        statCard('الطلبات النشطة', pendingOrders, 'كل الطلبات غير المكتملة'),
         statCard('الطلبات المكتملة', completedCount, 'مكتملة فقط'),
         statCard('طلبات هذا الأسبوع', ordersWeek, 'آخر 7 أيام'),
         statCard('طلبات هذا الشهر', ordersMonth, 'آخر 30 يوم'),
@@ -641,7 +797,7 @@ function renderRevenueChart() {
         labels.push(day.toLocaleDateString('ar-PS', { month: 'short', day: 'numeric' }));
         values.push(orders.filter(function (order) {
             var orderDate = new Date(order.date);
-            return order.status === 'completed' && orderDate >= day && orderDate < nextDay;
+            return getEffectiveOrderStatus(order) === 'completed' && orderDate >= day && orderDate < nextDay;
         }).reduce(function (sum, order) { return sum + (Number(order.total) || 0); }, 0));
     }
 
@@ -654,13 +810,13 @@ function renderRevenueChart() {
 }
 
 function renderStatusChart() {
-    var statuses = ['new', 'processing', 'completed', 'cancelled'];
+    var statuses = ORDER_STATUS_OPTIONS.slice();
     destroyChart('status');
     charts.status = new Chart(document.getElementById('statusChart'), {
         type: 'doughnut',
         data: {
             labels: statuses.map(ORDER_STATUS_LABEL),
-            datasets: [{ data: statuses.map(function (status) { return orders.filter(function (order) { return order.status === status; }).length; }), backgroundColor: ['#60a5fa', '#fbbf24', '#34d399', '#f87171'] }]
+            datasets: [{ data: statuses.map(function (status) { return orders.filter(function (order) { return getEffectiveOrderStatus(order) === status; }).length; }), backgroundColor: ['#60a5fa', '#fbbf24', '#2dd4bf', '#8b5cf6', '#34d399', '#f87171'] }]
         },
         options: { responsive: true, maintainAspectRatio: false }
     });

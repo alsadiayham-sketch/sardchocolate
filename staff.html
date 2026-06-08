@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sard Chocolate - بوابة الموظفين</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" href="logo.png">
+    <meta name="theme-color" content="#1A8C8C">
+</head>
+<body>
+    <div class="login-screen" id="staffLoginScreen">
+        <div class="login-card">
+            <h1>بوابة الموظفين</h1>
+            <p>الدخول للعامل أو السائق</p>
+            <form onsubmit="handleStaffLogin(event)">
+                <input type="text" id="staffLoginUser" placeholder="اسم المستخدم" required>
+                <input type="password" id="staffLoginPass" placeholder="كلمة المرور" required>
+                <button type="submit">دخول</button>
+                <p class="error" id="staffLoginError"></p>
+            </form>
+        </div>
+    </div>
+
+    <div class="staff-shell" id="staffPanel" style="display:none;">
+        <nav class="admin-nav">
+            <div class="admin-nav-content">
+                <h2>بوابة الموظفين</h2>
+                <div class="admin-tabs">
+                    <button class="tab-btn active" type="button">متابعة الطلبات</button>
+                </div>
+                <button class="logout-btn" onclick="logoutStaff()">خروج</button>
+            </div>
+        </nav>
+
+        <div class="admin-status-bar">
+            <div id="staffStatus" class="admin-status">جاري تحميل الطلبات...</div>
+            <div id="staffLoading" class="mini-loader"></div>
+        </div>
+
+        <main class="staff-main">
+            <section class="staff-welcome">
+                <div>
+                    <h2 id="staffWelcomeName">أهلاً بك</h2>
+                    <p id="staffWelcomeRole">جاري تحديد صلاحياتك...</p>
+                </div>
+                <span class="role-badge" id="staffRoleBadge">...</span>
+            </section>
+
+            <section class="staff-stats" id="staffStats"></section>
+
+            <section class="staff-sections">
+                <div class="staff-section">
+                    <div class="staff-section-header">
+                        <h3 id="staffAvailableTitle">طلبات متاحة</h3>
+                        <span class="staff-count-badge" id="staffAvailableCount">0</span>
+                    </div>
+                    <div class="staff-cards" id="staffAvailableOrders"></div>
+                </div>
+                <div class="staff-section">
+                    <div class="staff-section-header">
+                        <h3 id="staffAssignedTitle">طلباتي الحالية</h3>
+                        <span class="staff-count-badge" id="staffAssignedCount">0</span>
+                    </div>
+                    <div class="staff-cards" id="staffAssignedOrders"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="data.js"></script>
+    <script src="staff.js"></script>
+    <script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/service-worker.js'); }</script>
+</body>
+</html>

@@ -662,8 +662,11 @@ function initializePackagingBuilder() {
 
 function getOrderStatusLabel(status) {
     switch (status) {
+        case 'packaging': return 'قيد التغليف';
+        case 'ready': return 'جاهز للتوصيل';
+        case 'delivering': return 'قيد التوصيل';
         case 'confirmed': return 'تم التأكيد';
-        case 'processing': return 'قيد التجهيز';
+        case 'processing': return 'قيد التغليف';
         case 'completed': return 'مكتمل';
         case 'cancelled': return 'ملغي';
         default: return 'طلب جديد';

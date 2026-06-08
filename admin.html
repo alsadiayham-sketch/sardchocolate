@@ -34,6 +34,7 @@
                     <button class="tab-btn active" onclick="switchTab('dashboard', this)">لوحة المعلومات</button>
                     <button class="tab-btn" onclick="switchTab('products', this)">المنتجات</button>
                     <button class="tab-btn" onclick="switchTab('orders', this)">الطلبات</button>
+                    <button class="tab-btn" onclick="switchTab('staff', this)">الموظفين</button>
                     <button class="tab-btn" onclick="switchTab('settings', this)">الإعدادات</button>
                 </div>
                 <button class="logout-btn" onclick="logout()">خروج</button>
@@ -103,7 +104,9 @@
                     <select id="orderStatusFilter" onchange="renderOrdersTable()">
                         <option value="all">كل الحالات</option>
                         <option value="new">جديد</option>
-                        <option value="processing">قيد المعالجة</option>
+                        <option value="packaging">قيد التغليف</option>
+                        <option value="ready">جاهز للتوصيل</option>
+                        <option value="delivering">قيد التوصيل</option>
                         <option value="completed">مكتمل</option>
                         <option value="cancelled">ملغي</option>
                     </select>
@@ -113,6 +116,30 @@
                 <table class="admin-table">
                     <thead><tr><th>رقم الطلب</th><th>التاريخ</th><th>العميل</th><th>الهاتف</th><th>الوزن الكلي</th><th>الإجمالي</th><th>التوصيل</th><th>الحالة</th></tr></thead>
                     <tbody id="ordersTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-staff">
+            <div class="tab-header">
+                <h3>إدارة الموظفين</h3>
+                <div class="header-actions">
+                    <button class="btn-add" onclick="openStaffModal()">إضافة موظف</button>
+                </div>
+            </div>
+            <div class="products-table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>اسم المستخدم</th>
+                            <th>الدور</th>
+                            <th>كلمة المرور</th>
+                            <th>المعرف</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffTableBody"></tbody>
                 </table>
             </div>
         </div>
@@ -175,6 +202,40 @@
                 <div class="form-group"><label>تاريخ الانتهاء (اختياري)</label><input type="date" id="discountExpiry"></div>
                 <div class="form-group"><label>وصف الخصم (يظهر في البانر)</label><input type="text" id="discountDescription" placeholder="خصم 20% على جميع منتجات..." required></div>
                 <div class="modal-actions"><button type="submit" class="btn-save">حفظ</button><button type="button" class="btn-cancel" onclick="closeModal('discountModal')">إلغاء</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="staffModal" style="display:none;">
+        <div class="modal small-modal">
+            <h3 id="staffModalTitle">إضافة موظف</h3>
+            <form onsubmit="saveStaff(event)">
+                <input type="hidden" id="staffId">
+                <div class="form-group">
+                    <label>الاسم الظاهر</label>
+                    <input type="text" id="staffName" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>اسم المستخدم</label>
+                        <input type="text" id="staffUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label>كلمة المرور</label>
+                        <input type="text" id="staffPassword" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>الدور</label>
+                    <select id="staffRole" required>
+                        <option value="worker">عامل تغليف</option>
+                        <option value="driver">سائق توصيل</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-save">حفظ</button>
+                    <button type="button" class="btn-cancel" onclick="closeModal('staffModal')">إلغاء</button>
+                </div>
             </form>
         </div>
     </div>

@@ -1,13 +1,18 @@
-var CACHE_NAME = 'sard-chocolate-v1';
+var CACHE_NAME = 'sard-chocolate-v2';
 var ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/checkout.html',
   '/confirmation.html',
   '/builder.html',
+  '/admin.html',
+  '/staff.html',
   '/style.css',
+  '/admin.css',
   '/data.js',
   '/script.js',
+  '/admin.js',
+  '/staff.js',
   '/firebase-config.js',
   '/logo.png',
   '/hero-bg.png',
